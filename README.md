@@ -8,6 +8,15 @@ minimum-required-package-to-buy amount is calculated, in addition to extended
 costs. A tree structure of the BOM hierarchy can also be created and converted
 to DOT syntax for further graphics generation.
 
+The functionality can be accessed in three ways:
+
+| Method | Description |
+|--------|-------------|
+| Interactive TUI (terminal-based interface) | Launch with `pybom [directory]` |
+| API | In Python, use `from pybom import BOM`, then `BOM.from_folder()` or `BOM.single_file()` |
+| Command line | Run with `pybom [-h] (-f FILE \| -d FOLDER) action` |
+
+
 ## Motivation
 
 The main problem solved is to combine identical parts from various
@@ -80,16 +89,48 @@ which are:
 A single Excel file is used to store all part and assembly data through the use
 of Excel tabs.
 
-The first (left-most) Excel tab is treated as the Parts List "database", regardless
-of its name. All tabs/sheets to the right are interpreted as assemblies, with
-the sheet name as the assembly part number (PN).
+The conventions for the single file approach are the same as the multi-file
+approach, with the following exceptions:
+
+- The first (left-most) Excel tab is treated as the Parts List "database",
+  regardless of its name
+- All tabs/sheets to the right are interpreted as assemblies, with the sheet
+  name as the assembly part number (PN)
 
 
 ## Usage
 
-After downloading, install with pip via `pip install .`
+Install with pip via `pip install .`
 
 Setup your data with either the multi-file or single file approach.
+
+### TUI Browser
+
+In a terminal, browse to the folder containing your BOM files and issue the
+command `pybom` with no arguments (or issue the path to your directiry, e.g.
+`pybom /path/to/your/project`). This will cause it to enter the browser mode
+where you can interact with your BOM hierarchy and view derived properties such
+as the aggregated parts list and tree structure.
+
+The default screen shows the top-level assembly and its direct-child parts and
+assemblies. You can navigate down the hierarchy with the ⬆️ and ⬇️ arrow keys
+and by selecting an assembly and pressing `Enter` to view its child parts and
+assemblies. Pressing `Enter` on a part will show its details. Use the left arrow
+key ⬅️ or `Esc` to return to the parent assembly. You can also access different
+views and derived properties using the command keys listed at the bottom of the
+screen, such as `t` for a tree view. Assemblies are shown in cyan and bold text.
+The top row shows a breadcrumb of the current location in the BOM hierarchy.
+
+The commands at the bottom of the screen are:
+
+- `t` for a tree view of the full BOM hierarchy
+- `p` for a part list view (all the parts in the Parts List file
+- `a` for a list of all the assemblies in the BOM
+- `s` for a summary view (aggregated parts list with total QTY and purchase
+  QTY)
+
+![TUI Browser's main screen view](doc/images/TUI-browser-main-screen.png)
+
 
 ### API Usage
 
