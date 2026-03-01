@@ -32,24 +32,3 @@ def test_cli_dir_flag(bom_folder):
     assert proc.returncode == 0
 
 
-def test_repl_mode_no_args(bom_folder):
-    proc = subprocess.run(
-        [sys.executable, "-m", "pybom"],
-        input="quit\n",
-        capture_output=True, text=True,
-        env=_UTF8_ENV,
-        cwd=str(bom_folder),
-    )
-    assert proc.returncode == 0
-    assert "P1" in proc.stdout
-
-
-def test_repl_mode_path_arg(bom_folder):
-    proc = subprocess.run(
-        [sys.executable, "-m", "pybom", str(bom_folder)],
-        input="quit\n",
-        capture_output=True, text=True,
-        env=_UTF8_ENV,
-    )
-    assert proc.returncode == 0
-    assert "P1" in proc.stdout

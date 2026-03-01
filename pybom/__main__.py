@@ -16,15 +16,15 @@ from .BOM import BOM
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
 
-    # REPL mode: no args → use cwd; bare path arg → use that directory
+    # Browser mode: no args → use cwd; bare path arg → use that directory
     if len(sys.argv) == 1:
-        from .repl import run_repl
-        run_repl(directory='.')
+        from .browser import run_browser
+        run_browser(directory='.')
         return
 
     if len(sys.argv) == 2 and not sys.argv[1].startswith('-'):
-        from .repl import run_repl
-        run_repl(directory=sys.argv[1])
+        from .browser import run_browser
+        run_browser(directory=sys.argv[1])
         return
 
     parser = argparse.ArgumentParser(

@@ -2,7 +2,8 @@ import pandas as pd
 import pytest
 
 from pybom import BOM
-from pybom.browser import AssemblyScreen, BomBrowserApp, PartScreen
+from pybom.browser import AssemblyScreen, BomBrowserApp, ContentModal, PartScreen
+from textual.widgets import Static
 
 
 # ---------------------------------------------------------------------------
@@ -165,3 +166,75 @@ async def test_assembly_name_shown_in_list(nested_app):
         from textual.widgets import ListItem, Label
         labels = [lbl.content for lbl in nested_app.screen.query(Label)]
         assert any('Sub Assembly' in lbl for lbl in labels)
+
+
+# ---------------------------------------------------------------------------
+# Key-bound BOM analysis overlays
+# ---------------------------------------------------------------------------
+
+
+async def test_content_modal_displays_content(app):
+    async with app.run_test() as pilot:
+        await app.push_screen(ContentModal('Test Title', 'hello world'))
+        await pilot.pause()
+        assert isinstance(app.screen, ContentModal)
+        content = app.screen.query_one(Static).content
+        assert 'hello world' in content
+
+
+async def test_content_modal_wide_content_sets_static_width(app):
+    # Wide content (100 chars) must make the Static at least that wide so it
+    # doesn't wrap and the ScrollableContainer can scroll horizontally.
+    wide_line = 'X' * 100
+    async with app.run_test() as pilot:
+        await app.push_screen(ContentModal('T', wide_line))
+        await pilot.pause()
+        static = app.screen.query_one(Static)
+        assert static.styles.width.value >= 100
+
+
+async def test_content_modal_dismissed_by_escape(app):
+    async with app.run_test() as pilot:
+        await app.push_screen(ContentModal('Test', 'body'))
+        await pilot.pause()
+        await pilot.press('escape')
+        assert isinstance(app.screen, AssemblyScreen)
+
+
+async def test_t_key_shows_tree_modal(app):
+    async with app.run_test() as pilot:
+        await pilot.press('t')
+        await pilot.pause()
+        assert isinstance(app.screen, ContentModal)
+
+
+async def test_p_key_shows_parts_modal(app):
+    async with app.run_test() as pilot:
+        await pilot.press('p')
+        await pilot.pause()
+        assert isinstance(app.screen, ContentModal)
+        assert 'P1' in app.screen.query_one(Static).content
+
+
+async def test_a_key_shows_assemblies_modal(app):
+    async with app.run_test() as pilot:
+        await pilot.press('a')
+        await pilot.pause()
+        assert isinstance(app.screen, ContentModal)
+        assert 'Assembly' in app.screen.query_one(Static).content
+
+
+async def test_s_key_shows_summary_modal(app):
+    async with app.run_test() as pilot:
+        await pilot.press('s')
+        await pilot.pause()
+        assert isinstance(app.screen, ContentModal)
+        assert 'P1' in app.screen.query_one(Static).content
+
+
+async def test_modal_escape_returns_to_assembly(app):
+    async with app.run_test() as pilot:
+        await pilot.press('t')
+        await pilot.pause()
+        await pilot.press('escape')
+        assert isinstance(app.screen, AssemblyScreen)

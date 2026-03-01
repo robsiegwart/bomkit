@@ -1,9 +1,9 @@
 '''
 Interactive TUI browser for pyBOM, powered by Textual.
 
-Launched via ``python -m pybom --browse [directory]`` or the ``browse``
-command in the REPL.  Arrow keys navigate the list; Enter drills into an
-assembly or opens a part detail view; Escape / Left arrow goes back.
+Launched via ``python -m pybom [directory]`` or ``python -m pybom --browse [directory]``.
+Arrow keys navigate the list; Enter drills into an assembly or opens a part detail
+view; Escape / Left arrow goes back.  T/P/A/S show BOM analysis overlays.
 '''
 
 from __future__ import annotations
@@ -16,7 +16,8 @@ import pandas as pd
 from rich.markup import escape as markup_escape
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.screen import Screen
+from textual.containers import ScrollableContainer
+from textual.screen import ModalScreen, Screen
 from textual.widgets import Footer, Header, Label, ListItem, ListView, Static
 
 if TYPE_CHECKING:
@@ -38,6 +39,64 @@ def _get_name(item) -> str:
     except TypeError:
         return str(raw)
 
+
+def _collect_assemblies(bom: BOM, result: list | None = None) -> list:
+    '''Recursively collect all BOM nodes in depth-first order.'''
+    if result is None:
+        result = []
+    result.append(bom)
+    for sub in bom.assemblies:
+        _collect_assemblies(sub, result)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Content modal — overlay shown by T / P / A / S key bindings
+# ---------------------------------------------------------------------------
+
+class ContentModal(ModalScreen):
+    '''Scrollable overlay that displays the text output of a BOM command.'''
+
+    DEFAULT_CSS = '''
+    ContentModal {
+        align: center middle;
+    }
+    ContentModal > ScrollableContainer {
+        background: $surface;
+        border: thick $primary;
+        width: 90%;
+        height: 80%;
+        padding: 1 2;
+        overflow: auto auto;
+    }
+    '''
+
+    BINDINGS = [
+        Binding('escape', 'dismiss', 'Close', show=True),
+        Binding('q', 'dismiss', 'Close', show=True),
+    ]
+
+    def __init__(self, title: str, content: str, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._modal_title = title
+        self._content = content
+
+    def compose(self) -> ComposeResult:
+        with ScrollableContainer():
+            yield Static(f'[bold]{markup_escape(self._modal_title)}[/bold]\n\n{markup_escape(self._content)}')
+
+    def on_mount(self) -> None:
+        lines = self._content.split('\n')
+        max_len = max(
+            max((len(line) for line in lines), default=0),
+            len(self._modal_title),
+        ) + 2
+        self.query_one(Static).styles.width = max_len
+
+
+# ---------------------------------------------------------------------------
+# Screens
+# ---------------------------------------------------------------------------
 
 class AssemblyScreen(Screen):
     '''A navigable list of the children of one BOM node.'''
@@ -160,10 +219,22 @@ class PartScreen(Screen):
         return f'PN: {self.pn}\n(no properties found in parts database)'
 
 
+# ---------------------------------------------------------------------------
+# Application
+# ---------------------------------------------------------------------------
+
 class BomBrowserApp(App):
     '''Textual TUI browser for a pyBOM hierarchy.'''
 
     TITLE = 'pyBOM Browser'
+    ENABLE_COMMAND_PALETTE = False
+
+    BINDINGS = [
+        Binding('t', 'tree', 'Tree', show=True),
+        Binding('p', 'parts', 'Parts', show=True),
+        Binding('a', 'assemblies', 'Assemblies', show=True),
+        Binding('s', 'summary', 'Summary', show=True),
+    ]
 
     def __init__(self, bom: BOM) -> None:
         super().__init__()
@@ -182,6 +253,51 @@ class BomBrowserApp(App):
                 segments.append(screen.pn)
         return ' > '.join(segments)
 
+    # ------------------------------------------------------------------
+    # BOM analysis actions — bound to T / P / A / S
+    # ------------------------------------------------------------------
+
+    def action_tree(self) -> None:
+        self.push_screen(ContentModal('BOM Tree', str(self.root_bom.tree)))
+
+    def action_parts(self) -> None:
+        bom = self.root_bom
+        counts = bom.aggregate
+        if not counts:
+            content = 'No parts found.'
+        else:
+            df = bom.parts_db.df.copy()
+            df = df[df['PN'].isin(counts)].dropna(axis=1, how='all')
+            content = df.to_string(index=False)
+        self.push_screen(ContentModal('Parts List', content))
+
+    def action_assemblies(self) -> None:
+        bom = self.root_bom
+        rows = [(asm.PN or '', _get_name(asm)) for asm in _collect_assemblies(bom)]
+        if not rows:
+            content = 'No assemblies found.'
+        else:
+            pn_width = max(len(r[0]) for r in rows) + 2
+            has_names = any(r[1] for r in rows)
+            if has_names:
+                content = '\n'.join(f'{pn:{pn_width}}{name}' for pn, name in rows)
+            else:
+                content = '\n'.join(pn for pn, _ in rows)
+        self.push_screen(ContentModal('Assemblies', content))
+
+    def action_summary(self) -> None:
+        bom = self.root_bom
+        try:
+            df = bom.summary.dropna(axis=1, how='all')
+            content = df.to_string(index=False)
+        except Exception as e:
+            content = f'Error: {e}'
+        self.push_screen(ContentModal('BOM Summary', content))
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 
 def run_browser(directory: str = '.') -> None:
     '''
