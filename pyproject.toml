@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "PyBOM"
-version = "0.2"
+version = "0.2.0"
 description = "Bill of materials processing utilities"
 authors = [{ name = "Rob Siegwart", email = "rob@robsiegwart.com" }]
 readme = "README.md"
