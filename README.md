@@ -101,9 +101,9 @@ approach, with the following exceptions:
 
 ## Usage
 
-Install with pip via `pip install .`
+Install with pip via `pip install .`    <!-- TODO: add PyPI link when published -->
 
-Setup your data with either the multi-file or single file approach.
+Set up your data with either the multi-file or single file approach.
 
 ### TUI Browser
 
