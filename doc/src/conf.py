@@ -12,17 +12,17 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../pybom'))
+sys.path.insert(0, os.path.abspath('../../bomkit'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'pyBOM'
+project = 'bomkit'
 copyright = '2026, RSS'
 author = 'RSS'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2'
+release = '0.1.0'
 
 
 # -- General configuration ---------------------------------------------------

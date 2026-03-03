@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-03-02
+Initial public release as `bomkit` (formerly `pybom`).
+
 ### Added
 - Interactive TUI browser (`--browse` mode) powered by Textual
 - Initial test suite
@@ -17,20 +20,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `BOM.from_file()` made private (`_from_file()`)
 - `QTY` method returning Python integers
-  
-## [0.2.0] - 2023
+
+
+---
+
+
+## Pre-release history (as `pybom`)
+
+## 0.2.0 - 2023
 
 ### Added
 - `BOM.single_file()` for single-file BOMs
 
-## [0.1.0] - 2020
+## 0.1.0 - 2020
 
 ### Added
 - Core `BOM`, `Item`, `ItemLink`, and `PartsDB` data model
 - `BOM.from_folder()` for multi-file BOMs
 
 
-
-[Unreleased]: https://github.com/robsiegwart/pyBOM/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/robsiegwart/pyBOM/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/robsiegwart/pyBOM/releases/tag/v0.1.0
+[Unreleased]: https://github.com/robsiegwart/bomkit/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/robsiegwart/bomkit/releases/tag/v0.1.0

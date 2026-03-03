@@ -1,8 +1,8 @@
 import pytest
 import pandas as pd
 
-from pybom import BOM
-from pybom.BOM import fn_base
+from bomkit import BOM
+from bomkit.BOM import fn_base
 
 
 # ---------------------------------------------------------------------------

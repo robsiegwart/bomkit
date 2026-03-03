@@ -1,7 +1,7 @@
 '''
-Interactive TUI browser for pyBOM, powered by Textual.
+Interactive TUI browser for bomkit, powered by Textual.
 
-Launched via ``python -m pybom [directory]`` or ``python -m pybom --browse [directory]``.
+Launched via ``python -m bomkit [directory]`` or ``bomkit [directory]``.
 Arrow keys navigate the list; Enter drills into an assembly or opens a part detail
 view; Escape / Left arrow goes back.  T/P/A/S show BOM analysis overlays.
 '''
@@ -224,9 +224,9 @@ class PartScreen(Screen):
 # ---------------------------------------------------------------------------
 
 class BomBrowserApp(App):
-    '''Textual TUI browser for a pyBOM hierarchy.'''
+    '''Textual TUI browser for a bomkit hierarchy.'''
 
-    TITLE = 'pyBOM Browser'
+    TITLE = 'bomkit Browser'
     ENABLE_COMMAND_PALETTE = False
 
     BINDINGS = [

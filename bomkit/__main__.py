@@ -1,7 +1,7 @@
 '''
 Run the program from the command line via python module mode.
 
-> python -m pyBOM FOLDER ACTION
+> python -m bomkit FOLDER ACTION
 
     FOLDER      the folder name containing Excel files
     ACTION      the property to call on the ``BOM`` object
@@ -28,7 +28,7 @@ def main():
         return
 
     parser = argparse.ArgumentParser(
-        prog='pybom',
+        prog='bomkit',
         description='Parse a folder of Excel Bill-of-Materials.'
     )
 

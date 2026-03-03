@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from pybom import BOM
-from pybom.browser import AssemblyScreen, BomBrowserApp, ContentModal, PartScreen
+from bomkit import BOM
+from bomkit.browser import AssemblyScreen, BomBrowserApp, ContentModal, PartScreen
 from textual.widgets import Static
 
 

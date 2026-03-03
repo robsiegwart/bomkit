@@ -1,6 +1,6 @@
-# PyBOM
+# bomkit
 
-![Tests](https://github.com/robsiegwart/pyBOM/actions/workflows/test.yml/badge.svg)
+![Tests](https://github.com/robsiegwart/bomkit/actions/workflows/test.yml/badge.svg)
 
 A Python program for flattening a layered bill-of-material (BOM) based on Excel
 files. Part quantities are combined and a total quantity or
@@ -12,9 +12,9 @@ The functionality can be accessed in three ways:
 
 | Method | Description |
 |--------|-------------|
-| Interactive TUI (terminal-based interface) | Launch with `pybom [directory]` |
-| API | In Python, use `from pybom import BOM`, then `BOM.from_folder()` or `BOM.single_file()` |
-| Command line | Run with `pybom [-h] (-f FILE \| -d FOLDER) action` |
+| Interactive TUI (terminal-based interface) | Launch with `bomkit [directory]` |
+| API | In Python, use `from bomkit import BOM`, then `BOM.from_folder()` or `BOM.single_file()` |
+| Command line | Run with `bomkit [-h] (-f FILE \| -d FOLDER) action` |
 
 
 ## Motivation
@@ -108,8 +108,8 @@ Set up your data with either the multi-file or single file approach.
 ### TUI Browser
 
 In a terminal, browse to the folder containing your BOM files and issue the
-command `pybom` with no arguments (or issue the path to your directiry, e.g.
-`pybom /path/to/your/project`). This will cause it to enter the browser mode
+command `bomkit` with no arguments (or issue the path to your directiry, e.g.
+`bomkit /path/to/your/project`). This will cause it to enter the browser mode
 where you can interact with your BOM hierarchy and view derived properties such
 as the aggregated parts list and tree structure.
 
@@ -136,7 +136,7 @@ The commands at the bottom of the screen are:
 ### API Usage
 
 ```python
-from pybom import BOM
+from bomkit import BOM
 
 # Multi-file
 bom = BOM.from_folder(FOLDER)
@@ -231,11 +231,11 @@ on the top-level `BOM` object.
 This method is not persistent and is meant for quick one-off retrieval of information.
 
 ```
-> pybom [-h] (-f FILE | -d FOLDER) action
+> bomkit [-h] (-f FILE | -d FOLDER) action
 ```
 
 ```
-> pybom -d Example tree
+> bomkit -d Example tree
 SKA-100
 ├── Part SK1001-01        
 ├── TR-01
