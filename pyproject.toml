@@ -26,6 +26,9 @@ dependencies = [
     "textual>=0.50",
 ]
 
+[project.urls]
+Repository = "https://github.com/robsiegwart/bomkit"
+
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio"]
 
