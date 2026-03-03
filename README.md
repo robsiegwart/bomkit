@@ -16,7 +16,6 @@ The functionality can be accessed in three ways:
 | API | In Python, use `from bomkit import BOM`, then `BOM.from_folder()` or `BOM.single_file()` |
 | Command line | Run with `bomkit [-h] (-f FILE \| -d FOLDER) action` |
 
-
 ## Motivation
 
 The main problem solved is to combine identical parts from various
@@ -99,9 +98,16 @@ approach, with the following exceptions:
   name as the assembly part number (PN)
 
 
-## Usage
+## Installation
 
-Install with pip via `pip install .`    <!-- TODO: add PyPI link when published -->
+Install with pip:
+
+```
+pip install bomkit
+```
+
+
+## Usage
 
 Set up your data with either the multi-file or single file approach.
 
