@@ -2,8 +2,15 @@
 Interactive TUI browser for bomkit, powered by Textual.
 
 Launched via ``python -m bomkit [directory]`` or ``bomkit [directory]``.
-Arrow keys navigate the list; Enter drills into an assembly or opens a part detail
-view; Escape / Left arrow goes back.  T/P/A/S show BOM analysis overlays.
+Arrow keys navigate the list; Enter drills into an assembly or opens a part
+detail view; Escape / Left arrow goes back.  T/P/A/S show BOM analysis overlays.
+
+
+                      ====== Full disclosure ======
+This module was coded with AI, so it may not be the most efficient or
+well-structured implementation ...
+                      =============================
+
 '''
 
 from __future__ import annotations
