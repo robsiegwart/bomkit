@@ -2,11 +2,10 @@
 
 ![Tests](https://github.com/robsiegwart/bomkit/actions/workflows/test.yml/badge.svg)
 
-A Python program for flattening a layered bill-of-material (BOM) based on Excel
-files. Part quantities are combined and a total quantity or
-minimum-required-package-to-buy amount is calculated, in addition to extended
-costs. A tree structure of the BOM hierarchy can also be created and converted
-to DOT syntax for further graphics generation.
+A Python tool for flattening multi-level bills of materials (BOMs) from Excel
+files. It combines part quantities across the hierarchy, computing total
+quantities, minimum purchase quantities, and extended costs. BOM structure can
+also be exported as a tree for visualization.
 
 The functionality can be accessed in three ways:
 
@@ -18,15 +17,16 @@ The functionality can be accessed in three ways:
 
 ## Motivation
 
-The main problem solved is to combine identical parts from various
-sub-assemblies and locations in your product BOM. Additionally, it is designed
-to be used with Excel since Excel is common and does not require a separate
-program or server.
+When the same part appears in multiple sub-assemblies across your BOM, the total
+quantity you need isn't obvious from any single assembly. Flattening resolves
+this by aggregating quantities across every level of your product structure.
 
-Flattening tells you the total QTY of a part when it may be used in many
-sub-assemblies and levels in your product structure. This is necessary to
-calculate the total QTY of a part and therefore determine the mininum packages
-of the product to buy, since many parts come in packs greater than QTY 1.
+This is useful for purchasing because many parts are sold in packs larger than
+one. Knowing the true total quantity lets you calculate the minimum number of
+packs to buy.
+
+Excel is used as the input format since it's widely available and requires no
+additional software or server.
 
 ## Structure
 
@@ -114,7 +114,7 @@ Set up your data with either the multi-file or single file approach.
 ### TUI Browser
 
 In a terminal, browse to the folder containing your BOM files and issue the
-command `bomkit` with no arguments (or issue the path to your directiry, e.g.
+command `bomkit` with no arguments (or issue the path to your directory, e.g.
 `bomkit /path/to/your/project`). This will cause it to enter the browser mode
 where you can interact with your BOM hierarchy and view derived properties such
 as the aggregated parts list and tree structure.
