@@ -256,7 +256,7 @@ class BOM(Set, NodeMixin):
 
 
         counts = self.aggregate
-        df = self.parts_db.df
+        df = self.parts_db.df.copy()
         df['Total QTY'] = df.apply(lambda row: counts.get(row.PN), axis=1)
         df['Purchase QTY'] = df.apply(packages_to_buy, axis=1)
         df['Subtotal'] = df.apply(subtotal, axis=1)
