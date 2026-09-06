@@ -11,9 +11,9 @@ The functionality can be accessed in three ways:
 
 | Method | Description |
 |--------|-------------|
-| Interactive TUI (terminal-based interface) | Launch with `bomkit [directory]` |
+| Interactive TUI (terminal-based interface) | Launch with `bomkit [PATH]` |
 | API | In Python, use `from bomkit import BOM`, then `BOM.from_folder()` or `BOM.single_file()` |
-| Command line | Run with `bomkit [-h] (-f FILE \| -d FOLDER) action` |
+| Command line | Run with `bomkit [-h] [PATH] [action]` |
 
 ## Motivation
 
@@ -114,10 +114,11 @@ Set up your data with either the multi-file or single file approach.
 ### TUI Browser
 
 In a terminal, browse to the folder containing your BOM files and issue the
-command `bomkit` with no arguments (or issue the path to your directory, e.g.
-`bomkit /path/to/your/project`). This will cause it to enter the browser mode
-where you can interact with your BOM hierarchy and view derived properties such
-as the aggregated parts list and tree structure.
+command `bomkit` with no arguments (or issue a path, e.g.
+`bomkit /path/to/your/project` for multi-file, or `bomkit /path/to/bom.xlsx`
+for single-file). This will cause it to enter the browser mode where you can
+interact with your BOM hierarchy and view derived properties such as the
+aggregated parts list and tree structure.
 
 The default screen shows the top-level assembly and its direct-child parts and
 assemblies. You can navigate down the hierarchy with the ⬆️ and ⬇️ arrow keys
@@ -227,21 +228,22 @@ This returns a `BOM` object with properties on it you can retrieve:
 
 ### Command Line Usage
 
-Functionality is extended to the command line where the flags `-f` and `-d` are
-used to specify the name of a file for single-file mode or a folder for
-multi-file mode, respectively.
+Functionality is extended to the command line, where `PATH` is either a
+single Excel file (single-file mode) or a folder (multi-file mode) — which
+one is inferred automatically from whether `PATH` is a file or a directory.
 
 `action` is what to do with the imported data, which just maps to a property
-on the top-level `BOM` object.
+on the top-level `BOM` object. If omitted, the interactive TUI browser opens
+instead (see above).
 
 This method is not persistent and is meant for quick one-off retrieval of information.
 
 ```
-> bomkit [-h] (-f FILE | -d FOLDER) action
+> bomkit [-h] [PATH] [action]
 ```
 
 ```
-> bomkit -d "Example/Multi-file" tree
+> bomkit "Example/Multi-file" tree
 SKA-100
 ├── Part SK1001-01        
 ├── TR-01

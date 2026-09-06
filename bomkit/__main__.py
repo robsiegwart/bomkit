@@ -1,74 +1,92 @@
 '''
 Run the program from the command line via python module mode.
 
-> python -m bomkit FOLDER ACTION
+> python -m bomkit [PATH] [ACTION]
 
-    FOLDER      the folder name containing Excel files
-    ACTION      the property to call on the ``BOM`` object
+    PATH        a folder (multi-file layout) or a single Excel file
+                (single-file layout) containing BOM data. Defaults to the
+                current directory.
+    ACTION      the property to call on the resulting ``BOM`` object. If
+                omitted, opens the interactive TUI browser instead.
 
 '''
 
+import glob
+import os
 import sys
 import argparse
 from .BOM import BOM
 
 
+def _load_bom(path: str) -> BOM:
+    '''
+    Load a BOM from *path*, which may be either a folder (multi-file layout)
+    or a single ``.xlsx`` file (single-file layout).
+    '''
+    path = os.path.abspath(path)
+    try:
+        if os.path.isfile(path):
+            return BOM.single_file(path)
+        return _load_from_directory(path)
+    except FileNotFoundError:
+        print(f"Error: No BOM data found in {path}")
+        print("Expected either a 'Parts list.xlsx' file plus assembly files "
+              "(multi-file layout), or a single Excel file (single-file layout).")
+        sys.exit(1)
+    except Exception as e:
+        print(f'Error loading BOM: {e}')
+        sys.exit(1)
+
+
+def _load_from_directory(directory: str) -> BOM:
+    '''
+    Load a BOM from *directory*. Tries the multi-file layout first; if no
+    parts-list file is found and the directory contains exactly one
+    ``.xlsx`` file, falls back to treating that file as a single-file BOM
+    (a multi-file layout always needs at least two .xlsx files, so a lone
+    file is unambiguously the single-file case).
+    '''
+    try:
+        return BOM.from_folder(directory)
+    except FileNotFoundError:
+        xlsx_files = [
+            f for f in glob.glob(os.path.join(directory, '*.xlsx'))
+            if not os.path.basename(f).startswith(('_', '~'))
+        ]
+        if len(xlsx_files) == 1:
+            return BOM.single_file(xlsx_files[0])
+        raise
+
+
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
 
-    # Browser mode: no args → use cwd; bare path arg → use that directory
-    if len(sys.argv) == 1:
-        from .browser import run_browser
-        run_browser(directory='.')
-        return
-
-    if len(sys.argv) == 2 and not sys.argv[1].startswith('-'):
-        from .browser import run_browser
-        run_browser(directory=sys.argv[1])
-        return
-
     parser = argparse.ArgumentParser(
         prog='bomkit',
-        description='Parse a folder of Excel Bill-of-Materials.'
+        description='Parse a folder or Excel file of Bill-of-Materials data.'
     )
-
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        '-f', '--file',
-        help='The name of a single Excel BOM file.',
-        metavar='FILE'
-    )
-    group.add_argument(
-        '-d', '--dir',
-        help='The name of the folder containing Excel BOM files.',
-        metavar='FOLDER'
-    )
-    group.add_argument(
-        '-b', '--browse',
+    parser.add_argument(
+        'path',
         nargs='?',
-        const='.',
-        metavar='FOLDER',
-        help='Open the interactive TUI browser for a folder (default: cwd).',
+        default='.',
+        metavar='PATH',
+        help='Folder or Excel file containing BOM data (default: current directory).'
     )
-
     parser.add_argument(
         'action',
         nargs='?',
-        help='What to do with the resulting BOM.',
-        default='tree'
+        default=None,
+        help='What to do with the resulting BOM. If omitted, opens the '
+             'interactive TUI browser.'
     )
 
     ns = parser.parse_args()
+    bom = _load_bom(ns.path)
 
-    if ns.browse is not None:
+    if ns.action is None:
         from .browser import run_browser
-        run_browser(directory=ns.browse)
+        run_browser(bom)
         return
-
-    if ns.file:
-        bom = BOM.single_file(ns.file)
-    elif ns.dir:
-        bom = BOM.from_folder(ns.dir)
 
     print(getattr(bom, ns.action))
 

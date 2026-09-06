@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- CLI simplified to `bomkit [PATH] [action]`; single-file vs. multi-file mode
+  is now inferred from whether `PATH` is a file or a directory, removing the
+  `-f`/`-d`/`-b` flags
+- A directory `PATH` with no `Parts list.xlsx` but exactly one `.xlsx` file
+  is now treated as that single-file BOM, so `bomkit` and `bomkit .` work
+  from inside a single-file project folder, not just multi-file ones
+- TUI browser now works with single-file BOMs, not just multi-file folders
+
 ## [0.1.0] - 2026-03-02
 Initial public release as `bomkit` (formerly `pybom`).
 

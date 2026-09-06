@@ -15,8 +15,6 @@ well-structured implementation ...
 
 from __future__ import annotations
 
-import os
-import sys
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -306,24 +304,11 @@ class BomBrowserApp(App):
 # Entry point
 # ---------------------------------------------------------------------------
 
-def run_browser(directory: str = '.') -> None:
+def run_browser(bom: BOM) -> None:
     '''
-    Load BOMs from *directory* and open the interactive TUI browser.
+    Open the interactive TUI browser for *bom*.
 
-    :param str directory: Path to the folder containing BOM Excel files.
-                          Defaults to the current working directory.
+    :param BOM bom: The root BOM to browse, however it was constructed
+                    (:meth:`BOM.from_folder`, :meth:`BOM.single_file`, etc).
     '''
-    from .BOM import BOM
-
-    directory = os.path.abspath(directory)
-    try:
-        bom = BOM.from_folder(directory)
-    except FileNotFoundError:
-        print(f"Error: No 'Parts list.xlsx' found in {directory}")
-        print('Make sure the directory contains BOM Excel files.')
-        sys.exit(1)
-    except Exception as e:
-        print(f'Error loading BOM: {e}')
-        sys.exit(1)
-
     BomBrowserApp(bom).run()
