@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-06
+
 ### Added
 - New "long" single-file layout: a `Parts list` tab (parts and assemblies
   together, distinguished by a `Type` column) plus a single `BOMs` tab
@@ -61,5 +63,6 @@ Initial public release as `bomkit` (formerly `pybom`).
 - `BOM.from_folder()` for multi-file BOMs
 
 
-[Unreleased]: https://github.com/robsiegwart/bomkit/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/robsiegwart/bomkit/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/robsiegwart/bomkit/releases/tag/v0.2.0
 [0.1.0]: https://github.com/robsiegwart/bomkit/releases/tag/v0.1.0

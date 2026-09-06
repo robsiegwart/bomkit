@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bomkit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Bill of materials processing utilities"
 authors = [{ name = "Rob Siegwart", email = "rob@robsiegwart.com" }]
 readme = "README.md"
