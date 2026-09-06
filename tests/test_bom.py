@@ -139,6 +139,68 @@ def test_aggregate_multiplies_through_levels(nested_df):
 
 
 # ---------------------------------------------------------------------------
+# single_file() — "long" format (single "Parts list" + "BOMs" pair)
+# ---------------------------------------------------------------------------
+
+def test_single_file_long_detected_from_dict(long_df):
+    bom = BOM.single_file(long_df)
+    assert len(bom.assemblies) == 1   # Sub is a child assembly
+    assert len(bom.parts) == 1        # P1 is a direct part
+
+
+def test_single_file_long_detected_from_xlsx(long_xlsx):
+    bom = BOM.single_file(long_xlsx)
+    assert len(bom.assemblies) == 1
+    assert len(bom.parts) == 1
+
+
+def test_single_file_long_aggregate_multiplies_through_levels(long_df):
+    bom = BOM.single_file(long_df)
+    agg = bom.aggregate
+    assert agg["P1"] == 1
+    assert agg["P2"] == 6   # 3 per Sub × 2 Subs
+    assert agg["P3"] == 2   # 1 per Sub × 2 Subs
+
+
+def test_single_file_long_cots_treated_as_part_not_assembly(long_df):
+    bom = BOM.single_file(long_df)
+    pns = {p.PN for p in bom.flat}
+    assert "P3" in pns   # COTS-typed row, not split into the assembly hierarchy
+    assert bom.parts_db.get("P3") is not None
+
+
+def test_single_file_long_assembly_name_from_parts_list(long_df):
+    bom = BOM.single_file(long_df)
+    sub = bom.assemblies[0]
+    assert sub.PN == "Sub"
+    assert sub.Name == "Sub assembly"
+
+
+def test_single_file_long_missing_type_column_raises(long_df):
+    del long_df["Parts list"]["Type"]
+    with pytest.raises(ValueError):
+        BOM.single_file(long_df)
+
+
+def test_single_file_long_summary_works_on_subassembly(long_df):
+    # Regression check for BOM.summary using self.root.parts_db
+    bom = BOM.single_file(long_df)
+    sub = bom.assemblies[0]
+    df = sub.summary
+    assert isinstance(df, pd.DataFrame)
+
+
+def test_single_file_extra_sheet_alongside_boms_raises(long_df):
+    # A "BOMs" sheet mixed with additional per-sheet assemblies is ambiguous
+    # (is it the long format with a stray extra sheet, or the default format
+    # with one assembly literally named "BOMs"?) and must be rejected rather
+    # than silently misinterpreted as the default per-sheet format.
+    long_df["ExtraAssembly"] = pd.DataFrame([{"PN": "P2", "QTY": 1}])
+    with pytest.raises(ValueError):
+        BOM.single_file(long_df)
+
+
+# ---------------------------------------------------------------------------
 # from_folder()
 # ---------------------------------------------------------------------------
 

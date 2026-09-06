@@ -87,15 +87,56 @@ which are:
 ### Single File
 
 A single Excel file is used to store all part and assembly data through the use
-of Excel tabs.
+of Excel tabs. There are two supported layouts, described below; which one is
+used is detected automatically.
 
-The conventions for the single file approach are the same as the multi-file
-approach, with the following exceptions:
+#### Default layout
+
+The conventions for the default single-file layout are the same as the
+multi-file approach, with the following exceptions:
 
 - The first (left-most) Excel tab is treated as the Parts List "database",
   regardless of its name
 - All tabs/sheets to the right are interpreted as assemblies, with the sheet
   name as the assembly part number (PN)
+
+#### Long layout
+
+For BOMs with many assemblies, a "long" layout keeps everything in exactly two
+tabs instead of one tab per assembly:
+
+- **Parts list** — the first tab, containing *both* parts and assemblies in
+  one table. A `Type` column identifies each row as one of `Part`, `Assembly`,
+  or `COTS` (commercial off-the-shelf); rows for an assembly can leave the
+  part-specific fields (`Description`, `Supplier`, etc.) blank.
+- **BOMs** — the second tab, containing every assembly's line items together
+  in one table, with columns `Assy PN`, `PN`, and `QTY`. `Assy PN` identifies
+  which assembly each row belongs to.
+
+This layout is used whenever the workbook has exactly two tabs and the second
+is named `BOMs` (case-insensitive); otherwise the default layout above
+applies. For example:
+
+**Parts list**
+
+| PN        | Type     | Name           | Description                    | ... |
+| --------- | -------- | -------------- | ------------------------------ | --- |
+| SK1002-01 | Part     | Truck          | HollowKing Standard Trucks     | ... |
+| SK1003-01 | Part     | Bearing        | ABEC-7 Steel Bearings          | ... |
+| SK1004-01 | Part     | Wheel          | SlickCore 54mm Cruiser Wheels  | ... |
+| TR-01     | Assembly | Truck assembly |                                |     |
+| WH-01     | Assembly | Wheel assembly |                                |     |
+
+**BOMs**
+
+| Assy PN | PN        | QTY |
+| ------- | --------- | --- |
+| TR-01   | SK1002-01 | 1   |
+| TR-01   | WH-01     | 2   |
+| WH-01   | SK1004-01 | 1   |
+| WH-01   | SK1003-01 | 2   |
+
+See `Example/Single-file-long/` for a complete worked example.
 
 
 ## Installation

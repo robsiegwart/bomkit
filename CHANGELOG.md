@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- New "long" single-file layout: a `Parts list` tab (parts and assemblies
+  together, distinguished by a `Type` column) plus a single `BOMs` tab
+  holding every assembly's line items, keyed by `Assy PN`. `BOM.single_file()`
+  detects this layout automatically (exactly two sheets, the second named
+  `BOMs`) alongside the existing one-sheet-per-assembly layout.
+
 ### Changed
 - CLI simplified to `bomkit [PATH] [action]`; single-file vs. multi-file mode
   is now inferred from whether `PATH` is a file or a directory, removing the
@@ -15,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is now treated as that single-file BOM, so `bomkit` and `bomkit .` work
   from inside a single-file project folder, not just multi-file ones
 - TUI browser now works with single-file BOMs, not just multi-file folders
+- `BOM.summary` now resolves `parts_db` via the tree root, so it works when
+  called on any sub-assembly, not just the top-level BOM
+
+### Fixed
+- Removed a dead/broken `__init__` code path that referenced a
+  non-existent `init_parts` method
 
 ## [0.1.0] - 2026-03-02
 Initial public release as `bomkit` (formerly `pybom`).

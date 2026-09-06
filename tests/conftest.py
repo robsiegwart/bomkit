@@ -63,6 +63,36 @@ def bom_folder(tmp_path, simple_df):
 
 
 @pytest.fixture
+def long_df():
+    # "Long" single-file format: Top assembly references a sub-assembly (Sub)
+    # used 2 times, same structure/expected aggregates as nested_df (P1=1,
+    # P2=6, P3=2), but as a single "Parts list" + "BOMs" pair.
+    parts_list = pd.DataFrame([
+        {"PN": "P1",  "Name": "Bearing",       "Type": "Part"},
+        {"PN": "P2",  "Name": "Board",         "Type": "Part"},
+        {"PN": "P3",  "Name": "Bracket",       "Type": "COTS"},
+        {"PN": "Top", "Name": "Top assembly",  "Type": "Assembly"},
+        {"PN": "Sub", "Name": "Sub assembly",  "Type": "Assembly"},
+    ])
+    boms = pd.DataFrame([
+        {"Assy PN": "Top", "PN": "P1",  "QTY": 1},
+        {"Assy PN": "Top", "PN": "Sub", "QTY": 2},
+        {"Assy PN": "Sub", "PN": "P2",  "QTY": 3},
+        {"Assy PN": "Sub", "PN": "P3",  "QTY": 1},
+    ])
+    return {"Parts list": parts_list, "BOMs": boms}
+
+
+@pytest.fixture
+def long_xlsx(tmp_path, long_df):
+    fn = tmp_path / "bom_long.xlsx"
+    with pd.ExcelWriter(fn, engine="openpyxl") as w:
+        for name, df in long_df.items():
+            df.to_excel(w, sheet_name=name, index=False)
+    return fn
+
+
+@pytest.fixture
 def nested_bom_folder(tmp_path):
     '''Multi-file folder where the root assembly contains one part and one sub-assembly.'''
     parts = pd.DataFrame([

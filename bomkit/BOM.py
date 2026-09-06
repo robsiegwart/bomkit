@@ -328,40 +328,84 @@ class BOM(Set, NodeMixin):
                                 | dict[str, pd.DataFrame]) -> BOM:
         '''
         Build a structured BOM from a single source, where sheets (or dict keys)
-        follow this convention:
+        follow one of two conventions:
+
+        1) [Parts list, Assembly1, Assembly2, Assembly3, ...]
+        2) [Parts list, BOMs]
+
+        **Case 1** is the default single-file format, where each assembly has its own
+        sheet.
 
         - the first sheet/key is the parts list 'database'
         - all subsequent sheets/keys are assemblies
 
-        For each assembly the sheet name or dict key is the assembly part number (PN).
+        For each assembly the sheet name or dict key is the assembly part number
+        (PN).
+
+        **Case 2** is the "long" single-file format, detected automatically when
+        there are exactly two sheets/keys and the second is named "BOMs" (case
+        insensitive). All assemblies' line items live together in that one
+        "BOMs" table, with columns "Assy PN", "PN" and "QTY". The "Parts list"
+        sheet then contains parts *and* assemblies together, distinguished by a
+        "Type" column (one of "Part", "Assembly" or "COTS").
 
         ``source`` may be any of the following:
 
         - **str / path**: path to an ``.xlsx`` file on disk
         - **pd.ExcelFile**: an already-opened pandas ExcelFile object
-        - **dict**: keys are sheet names (str), values are DataFrames; the first
-          key is treated as the parts database and the rest as assemblies
+        - **dict**: keys are sheet names (str), values are DataFrames
         '''
-        # allow passing a dict/ExcelFile/path
         if isinstance(source, dict):
-            # treat keys as sheet names; values are DataFrames
-            parts_db = PartsDB(source[next(iter(source))])
-            assemblies = {
-                name: BOM(df, PN=name)
-                for name, df in list(source.items())[1:]
-            }
+            sheet_names = list(source.keys())
+            get_sheet = source.__getitem__    # store the sheet retrieval method for dicts
+        else:
+            if isinstance(source, pd.ExcelFile):
+                excelfile = source
+            else:
+                try:
+                    excelfile = pd.ExcelFile(source)
+                except FileNotFoundError:
+                    raise FileNotFoundError(f'File not found: {source}')
+            sheet_names = excelfile.sheet_names
+            get_sheet = excelfile.parse      # store the sheet retrieval method for ExcelFile objects
+
+        if len(sheet_names) < 2:
+            raise Exception('The Excel file in single file format must contain more than one tab.')
+
+        parts_list = get_sheet(sheet_names[0])
+        """The parts list is always the first sheet or dict key, regardless of format"""
+
+        second_sheet_is_boms = sheet_names[1].strip().lower() == 'boms'
+        """Test for the long single-file format, which is indicated by a second sheet named "BOMs" (case insensitive)"""
+
+        if second_sheet_is_boms and len(sheet_names) != 2:
+            raise ValueError(
+                f'Ambiguous single-file layout: a sheet named "BOMs" is the marker for '
+                f'the long single-file format, which must contain exactly two sheets '
+                f'("Parts list" and "BOMs"), but {len(sheet_names)} sheets were found: '
+                f'{sheet_names}.'
+            )
+
+        if second_sheet_is_boms:
+            boms = get_sheet(sheet_names[1])
+            if 'Type' not in parts_list.columns:
+                raise ValueError('The "Parts list" sheet must contain a "Type" column '
+                                  'to distinguish between parts and assemblies.')
+
+            is_assembly = parts_list['Type'].str.lower() == 'assembly'
+            parts_db = PartsDB(parts_list[~is_assembly])
+
+            assemblies = {}
+            for _, row in parts_list[is_assembly].iterrows():
+                bom = BOM(boms.loc[boms['Assy PN'] == row.PN, ['PN', 'QTY']], PN=row.PN)
+                if 'Name' in row and pd.notna(row.Name):
+                    bom.Name = row.Name
+                assemblies[row.PN] = bom
+
             return cls.parse_parent_child(parts_db, assemblies)
 
-        if isinstance(source, pd.ExcelFile):
-            excelfile = source
-        else:
-            excelfile = pd.ExcelFile(source)
-
-        sheets = excelfile.sheet_names
-        if not len(sheets) > 1:
-            raise Exception('The Excel file in single file format must contain more than one tab.')
-        parts_db = PartsDB(excelfile.parse(sheets[0]))
-        assemblies = { sheet_:BOM(excelfile.parse(sheet_), PN=sheet_) for sheet_ in sheets[1:] }
+        parts_db = PartsDB(parts_list)
+        assemblies = { name: BOM(get_sheet(name), PN=name) for name in sheet_names[1:] }
         return cls.parse_parent_child(parts_db, assemblies)
 
     @staticmethod
