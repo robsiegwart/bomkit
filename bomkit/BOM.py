@@ -142,9 +142,6 @@ class BOM(Set, NodeMixin):
         self.parts_db = parts_db
         self.Name: str | None = None
 
-        if self.parts_db and self.df:
-            self.init_parts()
-
     def __contains__(self, item: object) -> bool:
         return item in self.children
 
@@ -256,7 +253,7 @@ class BOM(Set, NodeMixin):
 
 
         counts = self.aggregate
-        df = self.parts_db.df.copy()
+        df = self.root.parts_db.df.copy()
         df['Total QTY'] = df.apply(lambda row: counts.get(row.PN), axis=1)
         df['Purchase QTY'] = df.apply(packages_to_buy, axis=1)
         df['Subtotal'] = df.apply(subtotal, axis=1)
