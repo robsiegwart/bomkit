@@ -63,8 +63,37 @@ def write_single_file(directory: str) -> None:
         for pn, (_, df) in ASSEMBLIES.items():
             df.to_excel(writer, sheet_name=pn, index=False)
 
+def write_single_file_long(directory: str) -> None:
+    '''
+    "Long" single-file layout: one workbook with a "Parts list" tab (parts
+    and assemblies together, distinguished by a "Type" column) and a "BOMs"
+    tab holding every assembly's line items in one long-format table, keyed
+    by an "Assy PN" column.
+    '''
+    os.makedirs(directory, exist_ok=True)
+    path = os.path.join(directory, f"{ROOT_PN}.xlsx")
+
+    parts = PARTS_LIST.copy()
+    parts.insert(1, "Type", "Part")
+
+    assemblies = pd.DataFrame([
+        {"PN": pn, "Name": name, "Type": "Assembly"}
+        for pn, (name, _) in ASSEMBLIES.items()
+    ])
+    parts_list = pd.concat([parts, assemblies], ignore_index=True)[parts.columns]
+
+    boms = pd.concat([
+        df.assign(**{"Assy PN": pn})[["Assy PN", "PN", "QTY"]]
+        for pn, (_, df) in ASSEMBLIES.items()
+    ], ignore_index=True)
+
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        parts_list.to_excel(writer, sheet_name="Parts list", index=False)
+        boms.to_excel(writer, sheet_name="BOMs", index=False)
+
 
 if __name__ == "__main__":
     write_multi_file(os.path.join(HERE, "Multi-file"))
     write_single_file(os.path.join(HERE, "Single-file"))
-    print("Wrote example data to Example/Multi-file and Example/Single-file")
+    write_single_file_long(os.path.join(HERE, "Single-file-long"))
+    print("Wrote example data to Example/Multi-file, Example/Single-file and Example/Single-file-long")
