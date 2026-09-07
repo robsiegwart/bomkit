@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Bumped `pytest` dev dependency to `>=9.0.3` to pick up a security fix,
+  which requires raising `requires-python` to `>=3.10` (was `>=3.8`).
+  `pytest` is dev-only and not installed by end users, but dropping
+  Python 3.8/3.9 support is a breaking change for the next release.
+- Constrained the transitive `pygments` dependency (pulled in via
+  `textual`/`rich`/`pytest`) to `>=2.20.0` for a security fix; resolves
+  to 2.21.0.
+
 ## [0.2.0] - 2026-09-06
 
 ### Added
